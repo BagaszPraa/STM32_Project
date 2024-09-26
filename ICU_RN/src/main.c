@@ -65,7 +65,8 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-MAX6675 MAX6675_struc;
+MAX6675 max6675_termo1;
+MAX6675 max6675_termo2;
 /* USER CODE END 0 */
 
 /**
@@ -126,11 +127,14 @@ int main(void)
                         HAL_MAX_DELAY);
       va_end(args);
   } 
+  /// THERMOCOUPLE 1
   HAL_SPI_Init(&hspi1);
-
-  // MAX6675_Init(&MAX6675_struc, &hspi1, TERMO1_CS_GPIO_Port, TERMO1_CS_Pin);
-  MAX6675_Init(&MAX6675_struc, &hspi1, TERMO1_CS_GPIO_Port , TERMO1_CS_Pin);
+  MAX6675_Init(&max6675_termo1, &hspi1, TERMO1_CS_GPIO_Port , TERMO1_CS_Pin);
+  /// THERMOCUPLE 2
+  HAL_SPI_Init(&hspi2);
+  MAX6675_Init(&max6675_termo2, &hspi2, TERMO2_CS_GPIO_Port , TERMO2_CS_Pin);
   HAL_TIM_Base_Start_IT(&htim3);
+  ///
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -138,10 +142,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-    UART_Printf("RawData %u TEMPint %u TEMPfloat %f\n\r",MAX6675_struc.rawSPIdata,
-                                    MAX6675_ConvertRawDataToTempIntDeg(&MAX6675_struc),
-                                    MAX6675_ConvertRawDataToTempFloatDeg(&MAX6675_struc));
-    float tempFloat = MAX6675_ConvertRawDataToTempFloatDeg(&MAX6675_struc);
+    UART_Printf("EGT = %u CHAMBER = %u\n\r", MAX6675_ConvertRawDataToTempIntDeg(&max6675_termo1), MAX6675_ConvertRawDataToTempIntDeg(&max6675_termo2));
+    float tempFloat = MAX6675_ConvertRawDataToTempFloatDeg(&max6675_termo1);
     if (tempFloat > 50){
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_1, GPIO_PIN_SET);
     }
@@ -216,12 +218,16 @@ void SystemClock_Config(void)
 ////INTERRUPT MAX6675//////
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim3.Instance == TIM3){
-		MAX6675_StartConversion_IT(&MAX6675_struc);
+		MAX6675_StartConversion_IT(&max6675_termo1);
+    MAX6675_StartConversion_IT(&max6675_termo2);
 	}
 }
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi){
 	if(hspi1.Instance == SPI1){
-		MAX6675_ConversionCplt_IT(&MAX6675_struc);
+		MAX6675_ConversionCplt_IT(&max6675_termo1);
+	}
+  if(hspi2.Instance == SPI2){
+		MAX6675_ConversionCplt_IT(&max6675_termo2);
 	}
 }
 ////INTERRUPT MAX6675//////
