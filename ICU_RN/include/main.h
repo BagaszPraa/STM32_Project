@@ -49,8 +49,6 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
-
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -61,8 +59,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define TERMO2_SO_Pin GPIO_PIN_2
 #define TERMO2_SO_GPIO_Port GPIOC
-#define PWM_EDF_1_Pin GPIO_PIN_0
-#define PWM_EDF_1_GPIO_Port GPIOA
 #define LED_Pin GPIO_PIN_1
 #define LED_GPIO_Port GPIOA
 #define TERMO1_CS_Pin GPIO_PIN_4
@@ -75,8 +71,6 @@ void Error_Handler(void);
 #define RPM_SENSOR_GPIO_Port GPIOE
 #define FUEL_FLOW_SENSOR_Pin GPIO_PIN_11
 #define FUEL_FLOW_SENSOR_GPIO_Port GPIOE
-#define PWM_FUEL_PUMP_Pin GPIO_PIN_10
-#define PWM_FUEL_PUMP_GPIO_Port GPIOB
 #define SSR_PYRO_Pin GPIO_PIN_9
 #define SSR_PYRO_GPIO_Port GPIOD
 #define SSR_FUEL_INIT_Pin GPIO_PIN_10
@@ -85,8 +79,6 @@ void Error_Handler(void);
 #define TERMO2_SCK_GPIO_Port GPIOA
 #define TERMO2_CS_Pin GPIO_PIN_10
 #define TERMO2_CS_GPIO_Port GPIOA
-#define PWM_EDF_2_Pin GPIO_PIN_3
-#define PWM_EDF_2_GPIO_Port GPIOB
 #define TERMO1_SO_Pin GPIO_PIN_4
 #define TERMO1_SO_GPIO_Port GPIOB
 

@@ -124,38 +124,27 @@ int main(void)
 	  UART_Printf("SPI OK\n\r");
   }
 
+
   HAL_SPI_Init(&hspi3);
 
   MAX6675_Init(&MAX6675_struc, &hspi3, TERMO_CS_GPIO_Port, TERMO_CS_Pin);
 
   HAL_TIM_Base_Start_IT(&htim2);
+
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    float tempFloat = MAX6675_ConvertRawDataToTempFloatDeg(&MAX6675_struc);
-    UART_Printf("0,0,0, %d.%02d, %u, %u,0\n\r", 
-                (int)tempFloat, 
-                (int)((tempFloat - (int)tempFloat) * 100),
-                MAX6675_struc.rawSPIdata,
-                MAX6675_ConvertRawDataToTempIntDeg(&MAX6675_struc)
-                );
-    // UART_Printf("%d.%02d,0,0,0,0,0,0\n\r", 
-    //             (int)tempFloat, 
-    //             (int)((tempFloat - (int)tempFloat) * 100));
-
-    if (tempFloat > 50.5) {
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);  // LED ON
-    } else {
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);  // LED OFF
-    }
-
-    HAL_Delay(100);  // Delay untuk UART
-
     /* USER CODE END WHILE */
+    UART_Printf("RawData %u TEMPint %u TEMPfloat %f\n\r",MAX6675_struc.rawSPIdata,
+                                    MAX6675_ConvertRawDataToTempIntDeg(&MAX6675_struc),
+                                    MAX6675_ConvertRawDataToTempFloatDeg(&MAX6675_struc));
 
+	 	HAL_Delay(100); //This delay is just for UART
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
