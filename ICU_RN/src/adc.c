@@ -116,7 +116,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PeriphClkInitStruct.PLL2.PLL2R = 2;
     PeriphClkInitStruct.PLL2.PLL2RGE = RCC_PLL2VCIRANGE_3;
     PeriphClkInitStruct.PLL2.PLL2VCOSEL = RCC_PLL2VCOMEDIUM;
-    PeriphClkInitStruct.PLL2.PLL2FRACN = 0.0;
+    PeriphClkInitStruct.PLL2.PLL2FRACN = 0;
     PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_PLL2;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
@@ -131,7 +131,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PA6     ------> ADC1_INP3
     PA7     ------> ADC1_INN3
     */
-    GPIO_InitStruct.Pin = PRESSURE_SENS_Pin|GPIO_PIN_7;
+    GPIO_InitStruct.Pin = PRESSURE_SENS_P_Pin|PRESSURE_SENS_N_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -157,7 +157,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     PA6     ------> ADC1_INP3
     PA7     ------> ADC1_INN3
     */
-    HAL_GPIO_DeInit(GPIOA, PRESSURE_SENS_Pin|GPIO_PIN_7);
+    HAL_GPIO_DeInit(GPIOA, PRESSURE_SENS_P_Pin|PRESSURE_SENS_N_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
