@@ -19,7 +19,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
-#include "dma.h"
 #include "fdcan.h"
 #include "memorymap.h"
 #include "spi.h"
@@ -63,7 +62,35 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+volatile uint32_t lastCapture = 0;
+volatile uint32_t rpm = 0;
+volatile uint32_t period = 0;
 
+char uartBuffer[50];  // Buffer untuk menyimpan string yang akan dikirimkan via UART
+
+// Callback dari Input Capture Interrupt
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+    {
+        uint32_t currentCapture = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        // Hitung periode (dalam microsecond) antara dua rising edges
+        uint32_t period = (currentCapture >= lastCapture) ? (currentCapture - lastCapture) : ((0xFFFFFFFF - lastCapture) + currentCapture);
+        // Simpan capture terakhir
+        lastCapture = currentCapture;
+        // Hitung RPM jika period valid (tidak nol)
+        if (period != 0)
+        {
+            rpm = (60 * 1000000) / period;  // 60 detik, 1 juta microsecond
+        }
+    }
+}
+
+// Fungsi untuk mendapatkan nilai RPM yang telah dihitung
+uint32_t GetRPM(void)
+{
+    return rpm;
+}
 /* USER CODE END 0 */
 
 /**
@@ -101,7 +128,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC1_Init();
   MX_FDCAN1_Init();
   MX_FDCAN2_Init();
@@ -122,33 +148,27 @@ int main(void)
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  /* USER CODE END 2 */
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);  /* USER CODE END 2 */
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);  /* USER CODE END 2 */
-  uint16_t pulseWidth = 100;   // Nilai awal 1000 µs (throttle minimum)
+  /* USER CODE END 2 */
+  HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-    SetPWMDutyCycle(&htim1, TIM_CHANNEL_1,pulseWidth);
-    SetPWMDutyCycle(&htim1, TIM_CHANNEL_2,pulseWidth);
-    SetPWMDutyCycle(&htim1, TIM_CHANNEL_3,pulseWidth);
-    GPIO_PinState LED_state = HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_3);
-      if (LED_state == GPIO_PIN_RESET)  // GPIO input LOW
-      {
-          if (pulseWidth < 200)
-          {
-              pulseWidth += 1;  // Tingkatkan nilai pulseWidth sebesar 1 µs
-              HAL_Delay(100);    // Delay 10 ms untuk perubahan yang lebih lambat
-          }
-      }
-      else{
-          pulseWidth = 100;
-      }
-      // Set nilai duty cycle dengan nilai pulseWidth yang terhitung
-    
+    uint32_t currentRPM = GetRPM();
+    sprintf(uartBuffer, "RPM: %lu\r\n", currentRPM);
+    SetPWMDutyCycle(&htim1, TIM_CHANNEL_1, 200);
+
+    // Kirimkan string melalui UART
+    HAL_UART_Transmit(&huart8, (uint8_t*)uartBuffer, strlen(uartBuffer), HAL_MAX_DELAY);
+
+    // Delay untuk menghindari pengiriman berlebihan
+    HAL_Delay(500);  // Tunda 1 detik sebelum kirim berikutnya
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
+
 /**
   * @brief System Clock Configuration
   * @retval None

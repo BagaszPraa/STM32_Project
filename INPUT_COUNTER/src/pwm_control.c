@@ -12,7 +12,7 @@ void SetPWMDutyCycle(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t pulseWi
     }
     else
     {
-        // Abaikan nilai jika berada di luar rentang 100 - 200 µs   
+        // Abaikan nilai jika berada di luar rentang 100 - 200 µs
         // Anda bisa tambahkan log error atau debugging di sini jika perlu
     }
 }
