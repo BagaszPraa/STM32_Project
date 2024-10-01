@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "pwm_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,20 +63,6 @@ static void MPU_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void SetPWMDutyCycle(uint16_t pulseWidth_us)
-{
-    // Cek apakah nilai pulseWidth_us berada di antara 100 dan 200 µs
-    if (pulseWidth_us >= 100 && pulseWidth_us <= 200)
-    {
-        // Atur compare value dari timer (PWM) jika nilainya valid
-        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulseWidth_us);
-    }
-    else
-    {
-        // Abaikan nilai jika berada di luar rentang 100 - 200 µs
-        // Bisa tambahkan kode untuk log error atau debugging jika diperlukan
-    }
-}
 
 /* USER CODE END 0 */
 
@@ -135,51 +121,25 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);  /* USER CODE END 2 */
   uint16_t pulseWidth = 100;   // Nilai awal 1000 µs (throttle minimum)
-  // uint8_t increment = 1;
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
     /* USER CODE END WHILE */
-    // Atur nilai duty cycle
     GPIO_PinState LED_state = HAL_GPIO_ReadPin(GPIOE,GPIO_PIN_3);
-      // Jika input GPIO LOW, naikkan pulse secara bertahap
       if (LED_state == GPIO_PIN_RESET)  // GPIO input LOW
       {
-          // Naikkan nilai pulseWidth hingga mencapai 200 µs
           if (pulseWidth < 200)
           {
               pulseWidth += 1;  // Tingkatkan nilai pulseWidth sebesar 1 µs
               HAL_Delay(100);    // Delay 10 ms untuk perubahan yang lebih lambat
           }
       }
-      else  // GPIO input HIGH
-      {
-          // Set nilai pulseWidth langsung ke 100 µs
+      else{
           pulseWidth = 100;
       }
       // Set nilai duty cycle dengan nilai pulseWidth yang terhitung
-      SetPWMDutyCycle(pulseWidth);
-    // // Naikkan atau turunkan duty cycle
-    // if (increment)
-    // {
-    //     dutyCycle += 10;     // Naik 10 µs
-    //     if (dutyCycle >= 200) // Jika mencapai batas atas (2000 µs)
-    //     {
-    //         increment = 0;   // Ubah arah, turunkan duty cycle
-    //     }
-    // }
-    // else
-    // {
-    //     dutyCycle -= 10;     // Turun 10 µs
-    //     if (dutyCycle <= 100) // Jika mencapai batas bawah (1000 µs)
-    //     {
-    //         increment = 1;   // Ubah arah, naikkan duty cycle
-    //     }
-    // }
-
-    // // Delay untuk melihat perubahan (atur sesuai kecepatan yang diinginkan)
-    // HAL_Delay(100);  // 20 ms delay
+    SetPWMDutyCycle(&htim1, TIM_CHANNEL_1,pulseWidth);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
